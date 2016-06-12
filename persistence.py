@@ -77,66 +77,70 @@ class mongoPersistence():
         self.updateMetrics1M(reading)
     
     def updateMetrics1m(self, reading):
-        if last1mreading is None:
-            doUpdate = true
+        doUpdate = False
+        if self.last1mreading is None:
+            doUpdate = True
         else:
             # Going to check how old our last metrics is. If it's older than 2 minutes, 
             # then we missed some data. To prevent weird delta's, we clear the last reading
             if (reading.timestamp - self.last1mreading.timestamp) > timedelta(seconds=120):
-                doUpdate = true;
+                doUpdate = True;
                 self.last1mreading = None
-            if (reading.timestamp - self.last1mreading.timestamp) > timedelta(seconds=60):
-                doUpdate = true;
+            elif (reading.timestamp - self.last1mreading.timestamp) > timedelta(seconds=60):
+                doUpdate = True;
         if doUpdate:
             print "updating metrics 1m"
             self.insertMetrics(reading, self.last1mreading, "metrics.minute")
             self.last1mreading = reading
 
     def updateMetrics1H(self, reading):
-        if last1Hreading is None:
-            doUpdate = true
+        doUpdate = False
+        if self.last1Hreading is None:
+            doUpdate = True
         else:
             # Going to check how old our last metrics is. If it's older than 1:05 hours, 
             # then we missed some data. To prevent weird delta's, we clear the last reading
             if (reading.timestamp - self.last1Hreading.timestamp) > timedelta(seconds=3900):
-                doUpdate = true;
+                doUpdate = True;
                 self.last1Hreading = None
-            if (reading.timestamp - self.last1Hreading.timestamp) > timedelta(seconds=3599):
-                doUpdate = true;
+            elif (reading.timestamp - self.last1Hreading.timestamp) > timedelta(seconds=3599):
+                doUpdate = True;
         if doUpdate:
             print "updating metrics 1H"
             self.insertMetrics(reading, self.last1Hreading, "metrics.hour")
             self.last1Hreading = reading
        
     def updateMetrics1D(self, reading):
-        if last1Dreading is None:
-            doUpdate = true
+        doUpdate = False
+        if self.last1Dreading is None:
+            doUpdate = True
         else:
             # Going to check how old our last metrics is. If it's older than 25 hours, 
             # then we missed some data. To prevent weird delta's, we clear the last reading
             if (reading.timestamp - self.last1Dreading.timestamp) >= timedelta(hours=25):
-                doUpdate = true;
+                doUpdate = True;
                 self.last1Dreading = None
-            if (reading.timestamp - self.last1Dreading.timestamp) > timedelta(hours=24):
-                doUpdate = true;
+            elif (reading.timestamp - self.last1Dreading.timestamp) > timedelta(hours=24):
+                doUpdate = True;
         if doUpdate:
             print "updating metrics 1D"
             self.insertMetrics(reading, self.last1Dreading, "metrics.day")
             self.last1Dreading = reading
 
     def updateMetrics1M(self, reading):
-        if last1Dreading is None:
-            doUpdate = true
+        doUpdate = False
+        if self.last1Dreading is None:
+            doUpdate = True
         else:
             # Going to check how old our last metrics is. If it's older than 32 days, 
             # then we missed some data. To prevent weird delta's, we clear the last reading
             if (reading.timestamp - self.last1Mreading.timestamp) >= timedelta(days=32):
-                doUpdate = true;
+                doUpdate = True;
                 self.last1Mreading = None
             # Compare on month, rather than diff. This takes care of months with different
             # number of days
-            if reading.timestamp.month != self.last1Mreading.timestamp.month:
-                doUpdate = true;
+            elif reading.timestamp.month != self.last1Mreading.timestamp.month:
+                doUpdate = True;
         if doUpdate:
             print "updating metrics 1M"
             self.insertMetrics(reading, self.last1Mreading, "metrics.month")
