@@ -93,7 +93,7 @@ class mongoPersistence():
             self.last1mreading = reading
 
     def updateMetrics1H(self, reading):
-       if last1Hreading is None:
+        if last1Hreading is None:
             doUpdate = true
         else:
             # Going to check how old our last metrics is. If it's older than 1:05 hours, 
