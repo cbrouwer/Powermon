@@ -89,6 +89,7 @@ class mongoPersistence():
                 doUpdate = True;
         if doUpdate:
             logging.info("updating metrics 1m")
+            reading.timestamp = reading.timestamp.replace(second=0,microsecond=0)
             self.insertMetrics(reading, self.last1mreading, "metrics.minute")
             self.last1mreading = reading
 
@@ -106,6 +107,7 @@ class mongoPersistence():
                 doUpdate = True;
         if doUpdate:
             logging.info("updating metrics 1H")
+            reading.timestamp = reading.timestamp.replace(minute=0,second=0,microsecond=0)
             self.insertMetrics(reading, self.last1Hreading, "metrics.hour")
             self.last1Hreading = reading
        
@@ -123,12 +125,13 @@ class mongoPersistence():
                 doUpdate = True;
         if doUpdate:
             logging.info("updating metrics 1D")
+            reading.timestamp = reading.timestamp.replace(hour=0,minute=0,second=0,microsecond=0)
             self.insertMetrics(reading, self.last1Dreading, "metrics.day")
             self.last1Dreading = reading
 
     def updateMetrics1M(self, reading):
         doUpdate = False
-        if self.last1Dreading is None:
+        if self.last1Mreading is None:
             doUpdate = True
         else:
             # Going to check how old our last metrics is. If it's older than 32 days, 
@@ -142,8 +145,10 @@ class mongoPersistence():
                 doUpdate = True;
         if doUpdate:
             logging.info("updating metrics 1M")
+            reading.timestamp = reading.timestamp.replace(hour=0,minute=0,second=0,microsecond=0)
             self.insertMetrics(reading, self.last1Mreading, "metrics.month")
             self.last1Mreading = reading
+
     def insertMetrics(self, reading, lastreading, collection):
             try:
                 db = self.client.powermon
@@ -157,7 +162,7 @@ class mongoPersistence():
                     delta_t2 = round(reading.t2 - lastreading.t2,5)
                     delta_total = round(delta_t1 + delta_t2,5)
                  
-                mreading = {"ts":  datetime.utcnow(), \
+                mreading = {"ts":  reading.timestamp, \
                         "t1": reading.t1, \
                         "t2": reading.t2, \
                         "d_t1": delta_t1, \
