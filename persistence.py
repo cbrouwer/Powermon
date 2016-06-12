@@ -154,9 +154,9 @@ class mongoPersistence():
                     delta_t2 = 0
                     delta_total = 0
                 else:
-                    delta_t1 = reading.t1 - lastreading.t1
-                    delta_t2 = reading.t2 - lastreading.t2
-                    delta_total = delta_t1 + delta_t2
+                    delta_t1 = round(reading.t1 - lastreading.t1, 5)
+                    delta_t2 = round(reading.t2 - lastreading.t2,5)
+                    delta_total = round(delta_t1 + delta_t2,5)
                  
                 mreading = {"ts":  datetime.utcnow(), \
                         "t1": reading.t1, \
