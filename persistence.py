@@ -30,7 +30,6 @@ from helpers import reading
 class mongoPersistence():
     def __init__ (self):
         self.client = None;
-        self.tz =  pytz.timezone("Europe/Amsterdam")
 
         try:
             self.client = MongoClient('mongodb://192.168.1.1:27017/')
@@ -86,10 +85,10 @@ class mongoPersistence():
             if (reading.timestamp - self.last1mreading.timestamp) > timedelta(seconds=120):
                 doUpdate = True;
                 self.last1mreading = None
-            elif (reading.timestamp - self.last1mreading.timestamp) > timedelta(seconds=60):
+            elif reading.timestamp.minute != self.last1mreading.timestamp.minute:
                 doUpdate = True;
         if doUpdate:
-            print "updating metrics 1m"
+            logging.info("updating metrics 1m")
             self.insertMetrics(reading, self.last1mreading, "metrics.minute")
             self.last1mreading = reading
 
@@ -103,10 +102,10 @@ class mongoPersistence():
             if (reading.timestamp - self.last1Hreading.timestamp) > timedelta(seconds=3900):
                 doUpdate = True;
                 self.last1Hreading = None
-            elif (reading.timestamp - self.last1Hreading.timestamp) > timedelta(seconds=3599):
+            elif reading.timestamp.hour != self.last1Hreading.timestamp.hour:
                 doUpdate = True;
         if doUpdate:
-            print "updating metrics 1H"
+            logging.info("updating metrics 1H")
             self.insertMetrics(reading, self.last1Hreading, "metrics.hour")
             self.last1Hreading = reading
        
@@ -120,10 +119,10 @@ class mongoPersistence():
             if (reading.timestamp - self.last1Dreading.timestamp) >= timedelta(hours=25):
                 doUpdate = True;
                 self.last1Dreading = None
-            elif (reading.timestamp - self.last1Dreading.timestamp) > timedelta(hours=24):
+            elif reading.timestamp.day != self.last1Dreading.timestamp.day:
                 doUpdate = True;
         if doUpdate:
-            print "updating metrics 1D"
+            logging.info("updating metrics 1D")
             self.insertMetrics(reading, self.last1Dreading, "metrics.day")
             self.last1Dreading = reading
 
@@ -142,7 +141,7 @@ class mongoPersistence():
             elif reading.timestamp.month != self.last1Mreading.timestamp.month:
                 doUpdate = True;
         if doUpdate:
-            print "updating metrics 1M"
+            logging.info("updating metrics 1M")
             self.insertMetrics(reading, self.last1Mreading, "metrics.month")
             self.last1Mreading = reading
     def insertMetrics(self, reading, lastreading, collection):

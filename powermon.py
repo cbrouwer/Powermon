@@ -25,11 +25,11 @@
 from time import sleep
 from datetime import datetime
 import pytz
-from persistence import mongoPersistence
-from helpers import reading
 import serial
 import sys
 import logging
+from persistence import mongoPersistence
+from helpers import reading
 
 class p1Interface():
     """p1Interface class: handling the serial interface and such"""
@@ -74,13 +74,13 @@ class p1Interface():
         # When we get here, there is no more data left. Check if the reading we have is
         # complete. If so, return it!
         if self.reading.isComplete():
-            print "Received a reading at " , self.reading.timestamp
-            print "usage: ", self.reading.consumption
-            print "t1: ", self.reading.t1
-            print "t2: ", self.reading.t2
+            logging.debug("Received a reading at " , self.reading.timestamp)
+            logging.debug("usage: ", self.reading.consumption)
+            logging.debug("t1: ", self.reading.t1)
+            logging.debug("t2: ", self.reading.t2)
             return self.reading;
         else:
-            print "Invalid reading!"
+            logging.warning("Ignoring invalid reading!")
         return None
         
         
@@ -91,7 +91,7 @@ class p1Interface():
             i_start = line.index('(')
             i_end = line.index(')')
             date = datetime.strptime( line[i_start+1:i_end], '%y%m%d%H%M%SS')
-            self.reading.timestamp = self.tz.localize(date)
+            self.reading.timestamp = self.tz.localize(date).astimezone(pytz.utc)
         elif "1-0:1.7.0" in line:
             i_start = line.index('(')
             i_end = line.index('*')
