@@ -77,57 +77,67 @@ class mongoPersistence():
         self.updateMetrics1M(reading)
     
     def updateMetrics1m(self, reading):
-        if self.last1mreading is None:
-            delta = None
+        if last1mreading is None:
+            doUpdate = true
         else:
-            delta = reading.timestamp - self.last1mreading.timestamp
-            if delta > timedelta(minutes=2):
-                # We missed some data? To prevent weird deltas, we 
-                # reset the delta to zero. A new empty delta will be inserted
-                delta = None
-        if delta is None or (delta > timedelta(minutes=1)):
+            # Going to check how old our last metrics is. If it's older than 2 minutes, 
+            # then we missed some data. To prevent weird delta's, we clear the last reading
+            if (reading.timestamp - self.last1mreading.timestamp) > timedelta(seconds=120):
+                doUpdate = true;
+                self.last1mreading = None
+            if (reading.timestamp - self.last1mreading.timestamp) > timedelta(seconds=60):
+                doUpdate = true;
+        if doUpdate:
             print "updating metrics 1m"
             self.insertMetrics(reading, self.last1mreading, "metrics.minute")
             self.last1mreading = reading
 
     def updateMetrics1H(self, reading):
-        if self.last1Hreading is None:
-            delta = None
+       if last1Hreading is None:
+            doUpdate = true
         else:
-            delta = reading.timestamp - self.last1Hreading.timestamp
-            if delta > timedelta(hours=2):
-                # We missed some data? To prevent weird deltas, we
-                # reset the delta to zero. A new empty delta will be inserted
-                delta = None
-        if delta is None or (delta > timedelta(hours=1)):
+            # Going to check how old our last metrics is. If it's older than 1:05 hours, 
+            # then we missed some data. To prevent weird delta's, we clear the last reading
+            if (reading.timestamp - self.last1Hreading.timestamp) > timedelta(seconds=3900):
+                doUpdate = true;
+                self.last1Hreading = None
+            if (reading.timestamp - self.last1Hreading.timestamp) > timedelta(seconds=3599):
+                doUpdate = true;
+        if doUpdate:
             print "updating metrics 1H"
             self.insertMetrics(reading, self.last1Hreading, "metrics.hour")
             self.last1Hreading = reading
        
     def updateMetrics1D(self, reading):
-        if self.last1Dreading is None:
-            delta = None
+        if last1Dreading is None:
+            doUpdate = true
         else:
-            delta = reading.timestamp - self.last1Dreading.timestamp
-            if delta > timedelta(days=2):
-                # We missed some data? To prevent weird deltas, we
-                # reset the delta to zero. A new empty delta will be inserted
-                delta = None
-        if delta is None or (delta > timedelta(days=1)):
+            # Going to check how old our last metrics is. If it's older than 25 hours, 
+            # then we missed some data. To prevent weird delta's, we clear the last reading
+            if (reading.timestamp - self.last1Dreading.timestamp) >= timedelta(hours=25):
+                doUpdate = true;
+                self.last1Dreading = None
+            if (reading.timestamp - self.last1Dreading.timestamp) > timedelta(hours=24):
+                doUpdate = true;
+        if doUpdate:
             print "updating metrics 1D"
             self.insertMetrics(reading, self.last1Dreading, "metrics.day")
             self.last1Dreading = reading
 
     def updateMetrics1M(self, reading):
-        if self.last1Mreading is None:
-            delta = None
+        if last1Dreading is None:
+            doUpdate = true
         else:
-            delta = reading.timestamp - self.last1Mreading.timestamp
-            if delta > timedelta(days=31):
-                # We missed some data? To prevent weird deltas, we
-                # reset the delta to zero. A new empty delta will be inserted
-                delta = None
-        if delta is None or (delta > timedelta(days=30)):
+            # Going to check how old our last metrics is. If it's older than 32 days, 
+            # then we missed some data. To prevent weird delta's, we clear the last reading
+            if (reading.timestamp - self.last1Mreading.timestamp) >= timedelta(days=32):
+                doUpdate = true;
+                self.last1Mreading = None
+            # Compare on month, rather than diff. This takes care of months with different
+            # number of days
+            if reading.timestamp.month != self.last1Mreading.timestamp.month:
+                doUpdate = true;
+        if doUpdate:
             print "updating metrics 1M"
             self.insertMetrics(reading, self.last1Mreading, "metrics.month")
             self.last1Mreading = reading
