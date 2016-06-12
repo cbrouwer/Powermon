@@ -37,8 +37,10 @@ class mongoPersistence():
         except Exception:
             logging.exception("Error on opening mongo client")
             sys.exit("Exception on getting Persistence - no point in continuing...")
-        self.last1mreading = self.getLastMetrics("metrics.minute");
-
+        self.last1mreading = self.getLastMetrics("metrics.minute")
+        self.last1Hreading = self.getLastMetrics("metrics.hour")
+        self.last1Dreading = self.getLastMetrics("metrics.day")
+        self.last1Mreading = self.getLastMetrics("metrics.month")
 
     def getLastMetrics(self, collection):
         try:
@@ -69,8 +71,10 @@ class mongoPersistence():
             logging.exception("Error on inserting reading!")
             
     def updateMetrics(self, reading):
-        self.updateMetrics1m(reading);
-    
+        self.updateMetrics1m(reading)
+        self.updateMetrics1H(reading) 
+        self.updateMetrics1D(reading)
+        self.updateMetrics1M(reading)
     
     def updateMetrics1m(self, reading):
         if self.last1mreading is None:
@@ -85,7 +89,48 @@ class mongoPersistence():
             print "updating metrics 1m"
             self.insertMetrics(reading, self.last1mreading, "metrics.minute")
             self.last1mreading = reading
+
+    def updateMetrics1H(self, reading):
+        if self.last1Hreading is None:
+            delta = None
+        else:
+            delta = reading.timestamp - self.last1Hreading.timestamp
+            if delta > timedelta(hours=2):
+                # We missed some data? To prevent weird deltas, we
+                # reset the delta to zero. A new empty delta will be inserted
+                delta = None
+        if delta is None or (delta > timedelta(hours=1)):
+            print "updating metrics 1H"
+            self.insertMetrics(reading, self.last1Hreading, "metrics.hour")
+            self.last1Hreading = reading
        
+    def updateMetrics1D(self, reading):
+        if self.last1Dreading is None:
+            delta = None
+        else:
+            delta = reading.timestamp - self.last1Dreading.timestamp
+            if delta > timedelta(days=2):
+                # We missed some data? To prevent weird deltas, we
+                # reset the delta to zero. A new empty delta will be inserted
+                delta = None
+        if delta is None or (delta > timedelta(days=1)):
+            print "updating metrics 1D"
+            self.insertMetrics(reading, self.last1Dreading, "metrics.day")
+            self.last1Dreading = reading
+
+    def updateMetrics1M(self, reading):
+        if self.last1Mreading is None:
+            delta = None
+        else:
+            delta = reading.timestamp - self.last1Mreading.timestamp
+            if delta > timedelta(days=31):
+                # We missed some data? To prevent weird deltas, we
+                # reset the delta to zero. A new empty delta will be inserted
+                delta = None
+        if delta is None or (delta > timedelta(days=30)):
+            print "updating metrics 1M"
+            self.insertMetrics(reading, self.last1Mreading, "metrics.month")
+            self.last1Mreading = reading
     def insertMetrics(self, reading, lastreading, collection):
             try:
                 db = self.client.powermon
