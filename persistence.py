@@ -36,7 +36,7 @@ class mongoPersistence():
         except Exception:
             logging.exception("Error on opening mongo client")
             sys.exit("Exception on getting Persistence - no point in continuing...")
-        self.last1mreading = self.getLastMetrics("metrics.minute")
+        self.last5mreading = self.getLastMetrics("metrics.minute")
         self.last1Hreading = self.getLastMetrics("metrics.hour")
         self.last1Dreading = self.getLastMetrics("metrics.day")
         self.last1Mreading = self.getLastMetrics("metrics.month")
@@ -70,28 +70,28 @@ class mongoPersistence():
             logging.exception("Error on inserting reading!")
             
     def updateMetrics(self, reading):
-        self.updateMetrics1m(reading)
+        self.updateMetrics5m(reading)
         self.updateMetrics1H(reading) 
         self.updateMetrics1D(reading)
         self.updateMetrics1M(reading)
     
-    def updateMetrics1m(self, reading):
+    def updateMetrics5m(self, reading):
         doUpdate = False
-        if self.last1mreading is None:
+        if self.last5mreading is None:
             doUpdate = True
         else:
-            # Going to check how old our last metrics is. If it's older than 2 minutes, 
+            # Going to check how old our last metrics is. If it's older than 6 minutes, 
             # then we missed some data. To prevent weird delta's, we clear the last reading
-            if (reading.timestamp - self.last1mreading.timestamp) > timedelta(seconds=120):
+            if (reading.timestamp - self.last5mreading.timestamp) > timedelta(seconds=359):
                 doUpdate = True;
-                self.last1mreading = None
-            elif reading.timestamp.minute != self.last1mreading.timestamp.minute:
+                self.last5mreading = None
+            if (reading.timestamp - self.last5mreading.timestamp) > timedelta(seconds=300):
                 doUpdate = True;
         if doUpdate:
-            logging.info("updating metrics 1m")
+            logging.info("updating metrics 5m")
             reading.timestamp = reading.timestamp.replace(second=0,microsecond=0)
-            self.insertMetrics(reading, self.last1mreading, "metrics.minute")
-            self.last1mreading = reading
+            self.insertMetrics(reading, self.last5mreading, "metrics.minute")
+            self.last5mreading = reading
 
     def updateMetrics1H(self, reading):
         doUpdate = False
