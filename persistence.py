@@ -61,8 +61,6 @@ class mongoPersistence():
         try:
             db = self.client.powermon
             mreading = {"ts": reading.timestamp.utcnow(), \
-                        "t1": reading.t1, \
-                        "t2": reading.t2, \
                         "consumption": reading.consumption}
             readings = db.reading
             readings.insert_one(mreading)
