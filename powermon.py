@@ -90,7 +90,12 @@ class p1Interface():
         if "0-0:1.0.0" in line:
             i_start = line.index('(')
             i_end = line.index(')')
-            date = datetime.strptime( line[i_start+1:i_end], '%y%m%d%H%M%SS')
+            if (line.find('W') > -1):
+               i_end = line.index('W')
+            try:
+               date = datetime.strptime( line[i_start+1:i_end], '%y%m%d%H%M%SS')
+            except ValueError:
+              date = datetime.strptime( line[i_start+1:i_end], '%y%m%d%H%M%S')
             self.reading.timestamp = self.tz.localize(date).astimezone(pytz.utc)
         elif "1-0:1.7.0" in line:
             i_start = line.index('(')
