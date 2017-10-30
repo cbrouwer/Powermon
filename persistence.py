@@ -75,6 +75,8 @@ class mongoPersistence():
     
     def updateMetrics5m(self, reading):
         doUpdate = False
+        
+        logging.debug(self.last5mreading)
         if self.last5mreading is None:
             doUpdate = True
         else:
@@ -83,7 +85,7 @@ class mongoPersistence():
             if (reading.timestamp - self.last5mreading.timestamp) > timedelta(seconds=359):
                 doUpdate = True;
                 self.last5mreading = None
-            if (reading.timestamp - self.last5mreading.timestamp) > timedelta(seconds=300):
+            elif (reading.timestamp - self.last5mreading.timestamp) > timedelta(seconds=300):
                 doUpdate = True;
         if doUpdate:
             logging.info("updating metrics 5m")
