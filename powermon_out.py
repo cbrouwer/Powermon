@@ -81,7 +81,7 @@ class p1Interface():
             logging.debug("usage: ", self.reading.consumption)
             logging.debug("t1: ", self.reading.t1)
             logging.debug("t2: ", self.reading.t2)
-            self.send_telegram(telegram, 'http://dsmr.blindwatchmaker.nl/api/v1/datalogger/dsmrreading','WO2EV8TNYEP94O8DNDYMQXWQB0FR477IUMS4T1KJ1Y841JBLZ47R7SWZA1FKBS6C')
+            self.send_telegram(telegram, 'http://dsmr.blindwatchmaker.nl/api/v1/datalogger/dsmrreading','0ZQ8ID7AJKZYE75EK4DNH9XB536H09T9LFTQE7FV2QYJXOUUS9N0P4XFJ71U1IV0')
             return self.reading;
         else:
             logging.warning("Ignoring invalid reading!")

@@ -28,7 +28,6 @@ import pytz
 import serial
 import sys
 import logging
-import requests
 from persistence import mongoPersistence
 from helpers import reading
 
@@ -61,11 +60,9 @@ class p1Interface():
             it will return None """
         self.reading = reading()
         data_left = 1;
-        telegram = "";
         while (data_left > 0):
             try:
                 p1_raw = self.serial_connection.readline()
-                telegram += str(p1_raw) 
                 self.processLine(str(p1_raw))
             except Exception:
                 logging.exception("Exception on retrieving data from serial interface!"
@@ -81,25 +78,11 @@ class p1Interface():
             logging.debug("usage: ", self.reading.consumption)
             logging.debug("t1: ", self.reading.t1)
             logging.debug("t2: ", self.reading.t2)
-            self.send_telegram(telegram, 'http://dsmr.blindwatchmaker.nl/api/v1/datalogger/dsmrreading','WO2EV8TNYEP94O8DNDYMQXWQB0FR477IUMS4T1KJ1Y841JBLZ47R7SWZA1FKBS6C')
             return self.reading;
         else:
             logging.warning("Ignoring invalid reading!")
         return None
         
-
-    def send_telegram(self, telegram, api_url, api_key):
-        # Register telegram by simply sending it to the application with a POST request.
-        response = requests.post(
-            api_url,
-            headers={'X-AUTHKEY': api_key},
-            data={'telegram': telegram},
-        )
-
-        # Old versions of DSMR-reader return 200, new ones 201.
-        if response.status_code not in (200, 201):
-            # Or you will find the error (hint) in the reponse body on failure.
-            print('API error: {}'.format(response.text))
         
     def processLine(self, line):
         # The serial interface seems to be adding NULL characters sometimes...
